@@ -1,0 +1,5 @@
+fragment UserType on User {
+  id: _id
+  username
+  email
+}

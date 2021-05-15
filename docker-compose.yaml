@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  reddit-client:
+    build:
+      context: reddit-client
+    ports:
+      - "8080:3000"
+    # volumes:
+    #   - .:/usr/src/app
+    depends_on:
+      - reddit-server
+  reddit-server:
+    build:
+      context: reddit-server
+    # command: "yarn watch"
+    ports:
+      - "4000:4000"
+    # volumes:
+    #   - .:/usr/src/app
+    depends_on:
+      - postgres-db-service
+      - redis-auth-service
+  postgres-db-service:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reddittypeorm
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-db-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+  redis-auth-service:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
