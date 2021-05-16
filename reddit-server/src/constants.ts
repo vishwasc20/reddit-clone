@@ -2,6 +2,8 @@ import { getIPv4Address } from "./utils/get-ip-address";
 
 export const __prod__ = process.env.NODE_ENV === "production";
 
+export const DOCKER_DEV_ENV = process.env.DOCKER_DEV === "true";
+
 export const AUTH_COOKIE_NAME = "qid";
 
 export const FORGET_PASSWORD_PREFIX = "forget-password:";
@@ -12,9 +14,9 @@ export const VALID_EMAIL_REGEX =
 export const RESET_PASSWORD_TEMPLATE = (token: string) =>
   `<a href="http://localhost:3000/reset-password/${token}">Reset Password</a>`;
 
-export const REDIS_HOST = __prod__ ? "redis-auth-service" : "localhost";
+export const REDIS_HOST = DOCKER_DEV_ENV ? "redis-auth-service" : "localhost";
 
-export const CORS_HOST = __prod__
+export const CORS_HOST = DOCKER_DEV_ENV
   ? "http://localhost:8080"
   : "http://localhost:3000";
 

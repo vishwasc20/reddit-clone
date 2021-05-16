@@ -17,6 +17,9 @@ services:
       - "4000:4000"
     # volumes:
     #   - .:/usr/src/app
+    environment:
+      DOCKER_DEV: true
+      DEBUG: true #redis logs
     depends_on:
       - postgres-db-service
       - redis-auth-service
