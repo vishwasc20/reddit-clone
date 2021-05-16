@@ -19,7 +19,7 @@ services:
     #   - .:/usr/src/app
     environment:
       DOCKER_DEV: true
-      DEBUG: true #redis logs
+      DEBUG: false # redis logs
     depends_on:
       - postgres-db-service
       - redis-auth-service

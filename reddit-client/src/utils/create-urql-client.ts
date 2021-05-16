@@ -8,6 +8,7 @@ import {
 } from "../generated/graphql";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { updateQueryHelper } from "./update-query-helper";
+import { cursorPagination } from "./cursor-pagination-helper";
 
 export const createUrqlClient = (ssrExchange: any) => ({
   url: "http://localhost:4000/graphql",
@@ -17,6 +18,14 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      keys: {
+        PaginatedPosts: () => null,
+      },
+      resolvers: {
+        Query: {
+          posts: cursorPagination(),
+        },
+      },
       updates: {
         Mutation: {
           login: (_result, args, cache, info) => {

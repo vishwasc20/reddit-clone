@@ -20,18 +20,24 @@ import cors from "cors";
 import { createConnection } from "typeorm";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+import path from "path";
+import { Updoot } from "./entities/Updoot";
 
 const main = async () => {
-  await createConnection({
+  const typeORMConnection = await createConnection({
     type: "postgres",
     database: "reddittypeorm",
     username: "postgres",
     password: "postgres",
     logging: !__prod__,
     synchronize: !__prod__,
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
     host: POSTGRES_HOST,
+    migrations: [path.join(__dirname, "./migrations/*")],
   });
+  await typeORMConnection.runMigrations();
+
+  // await Post.delete({});
 
   const app = express();
 
