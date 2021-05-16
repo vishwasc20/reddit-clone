@@ -1,4 +1,4 @@
-import { UsernamePasswordInput } from "../resolvers/UsernamePasswordInput";
+import { UsernamePasswordInput } from "../types";
 import { VALID_EMAIL_REGEX } from "../constants";
 
 export const validateRegister = (options: UsernamePasswordInput) => {
@@ -10,6 +10,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
       },
     ];
   }
+
   if (options.username.includes("@")) {
     return [
       {
@@ -18,6 +19,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
       },
     ];
   }
+
   if (!VALID_EMAIL_REGEX.test(options.email)) {
     return [
       {
@@ -26,6 +28,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
       },
     ];
   }
+
   if (options.password.length <= 3) {
     return [
       {
@@ -34,5 +37,6 @@ export const validateRegister = (options: UsernamePasswordInput) => {
       },
     ];
   }
+
   return null;
 };

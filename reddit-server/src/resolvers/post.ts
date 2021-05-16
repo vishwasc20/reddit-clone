@@ -3,22 +3,12 @@ import {
   Query,
   Arg,
   Mutation,
-  InputType,
-  Field,
   Ctx,
   UseMiddleware,
 } from "type-graphql";
 import { Post } from "../entities/Post";
-import { MyContext } from "../types";
+import { MyContext, PostInput } from "../types";
 import { isAuth } from "../middleware/isAuth";
-
-@InputType()
-class PostInput {
-  @Field()
-  title: string;
-  @Field()
-  text: string;
-}
 
 @Resolver()
 export class PostResolver {

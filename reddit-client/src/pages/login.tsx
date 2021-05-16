@@ -29,7 +29,7 @@ const Login: React.FC<loginProps> = ({}) => {
             if (typeof router.query.next === "string") {
               router.push(router.query.next);
             } else {
-              router.push(`${router.query.next}` || "/");
+              router.push("/");
             }
           }
         }}

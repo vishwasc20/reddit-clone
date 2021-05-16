@@ -1,6 +1,6 @@
 query Posts {
   posts {
-    id: _id
+    id
     createdAt
     updatedAt
     title

@@ -1,42 +1,18 @@
-import {
-  Resolver,
-  Mutation,
-  Arg,
-  Field,
-  Ctx,
-  ObjectType,
-  Query,
-} from "type-graphql";
+import { Resolver, Mutation, Arg, Ctx, Query } from "type-graphql";
 import { MyContext } from "../types";
 import { User } from "../entities/User";
 import argon2 from "argon2";
 import {
-  COOKIE_NAME,
+  AUTH_COOKIE_NAME,
   FORGET_PASSWORD_PREFIX,
   RESET_PASSWORD_TEMPLATE,
   VALID_EMAIL_REGEX,
 } from "../constants";
-import { UsernamePasswordInput } from "./UsernamePasswordInput";
+import { UsernamePasswordInput } from "../types";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
-import { v4 } from "uuid";
-
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-  @Field()
-  message: string;
-}
-
-@ObjectType()
-class UserResponse {
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-
-  @Field(() => User, { nullable: true })
-  user?: User;
-}
+import { v4 as uuid } from "uuid";
+import { UserResponse } from "../types";
 
 @Resolver()
 export class UserResolver {
@@ -57,8 +33,8 @@ export class UserResolver {
       };
     }
 
-    const key = FORGET_PASSWORD_PREFIX + token;
-    const userId = await redis.get(key);
+    const redisKey = `${FORGET_PASSWORD_PREFIX}${token}`;
+    const userId = await redis.get(redisKey);
     if (!userId) {
       return {
         errors: [
@@ -91,7 +67,7 @@ export class UserResolver {
       }
     );
 
-    await redis.del(key);
+    await redis.del(redisKey);
 
     // log in user after change password
     req.session.userId = user.id;
@@ -107,16 +83,18 @@ export class UserResolver {
     if (!VALID_EMAIL_REGEX.test(email)) {
       return false;
     }
+
     const user = await User.findOne({ where: { email } });
+
     if (!user) {
       // the email is not in the db
       return true;
     }
 
-    const token = v4();
+    const token = uuid();
 
     await redis.set(
-      FORGET_PASSWORD_PREFIX + token,
+      `${FORGET_PASSWORD_PREFIX}${token}`,
       user.id,
       "ex",
       1000 * 60 * 60 * 24 * 3
@@ -142,22 +120,23 @@ export class UserResolver {
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    const errors = validateRegister(options);
-    if (errors) {
-      return { errors };
+    const invalidRegistrationErrors = validateRegister(options);
+
+    if (invalidRegistrationErrors) {
+      return { errors: invalidRegistrationErrors };
     }
 
     const hashedPassword = await argon2.hash(options.password);
     try {
-      const result = await User.create({
+      const user = await User.create({
         username: options.username,
         password: hashedPassword,
         email: options.email,
       }).save();
 
-      req.session.userId = result.id;
+      req.session.userId = user.id;
 
-      return { user: result };
+      return { user };
     } catch (err) {
       return {
         errors: [
@@ -181,6 +160,7 @@ export class UserResolver {
         ? { where: { email: usernameOrEmail } }
         : { where: { username: usernameOrEmail } }
     );
+
     if (!user) {
       return {
         errors: [
@@ -191,6 +171,7 @@ export class UserResolver {
         ],
       };
     }
+
     const valid = await argon2.verify(user.password, password);
     if (!valid) {
       return {
@@ -211,10 +192,10 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  logout(@Ctx() { req, res }: MyContext) {
+  logout(@Ctx() { req, res }: MyContext): Promise<Boolean> {
     return new Promise((resolve) =>
-      req.session.destroy((err) => {
-        res.clearCookie(COOKIE_NAME);
+      req.session.destroy((err: Error) => {
+        res.clearCookie(AUTH_COOKIE_NAME);
         if (err) {
           console.log(err);
           resolve(false);

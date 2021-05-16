@@ -1,5 +1,12 @@
 import "reflect-metadata";
-import { __prod__, COOKIE_NAME, CORS_HOST, REDIS_HOST } from "./constants";
+import {
+  __prod__,
+  AUTH_COOKIE_NAME,
+  CORS_HOST,
+  REDIS_HOST,
+  PORT,
+  POSTGRES_HOST,
+} from "./constants";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -15,7 +22,7 @@ import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 
 const main = async () => {
-  const conn = await createConnection({
+  await createConnection({
     type: "postgres",
     database: "reddittypeorm",
     username: "postgres",
@@ -23,7 +30,7 @@ const main = async () => {
     logging: !__prod__,
     synchronize: !__prod__,
     entities: [Post, User],
-    host: REDIS_HOST,
+    host: POSTGRES_HOST,
   });
 
   const app = express();
@@ -38,7 +45,7 @@ const main = async () => {
   );
   app.use(
     session({
-      name: COOKIE_NAME,
+      name: AUTH_COOKIE_NAME,
       store: new RedisStore({
         client: redis,
         disableTouch: true,
@@ -68,8 +75,8 @@ const main = async () => {
     cors: false,
   });
 
-  app.listen(4000, () => {
-    console.log("server started on localhost:4000");
+  app.listen(PORT, () => {
+    console.log(`Server started on localhost:${PORT}`);
   });
 };
 

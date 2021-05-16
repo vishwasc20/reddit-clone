@@ -2,8 +2,6 @@ import gql from 'graphql-tag';
 import * as Urql from 'urql';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -25,11 +23,11 @@ export type Mutation = {
   createPost: Post;
   updatePost?: Maybe<Post>;
   deletePost: Scalars['Boolean'];
+  changePassword: UserResponse;
+  forgotPassword: Scalars['Boolean'];
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
-  forgotPassword: Scalars['Boolean'];
-  changePassword: UserResponse;
 };
 
 
@@ -40,12 +38,23 @@ export type MutationCreatePostArgs = {
 
 export type MutationUpdatePostArgs = {
   title?: Maybe<Scalars['String']>;
-  id: Scalars['Int'];
+  id: Scalars['Float'];
 };
 
 
 export type MutationDeletePostArgs = {
-  id: Scalars['Int'];
+  id: Scalars['Float'];
+};
+
+
+export type MutationChangePasswordArgs = {
+  newPassword: Scalars['String'];
+  token: Scalars['String'];
+};
+
+
+export type MutationForgotPasswordArgs = {
+  email: Scalars['String'];
 };
 
 
@@ -59,26 +68,15 @@ export type MutationLoginArgs = {
   usernameOrEmail: Scalars['String'];
 };
 
-
-export type MutationForgotPasswordArgs = {
-  email: Scalars['String'];
-};
-
-
-export type MutationChangePasswordArgs = {
-  newPassword: Scalars['String'];
-  token: Scalars['String'];
-};
-
 export type Post = {
   __typename?: 'Post';
-  _id: Scalars['Int'];
+  id: Scalars['Float'];
+  title: Scalars['String'];
+  text: Scalars['String'];
+  points: Scalars['Float'];
+  creatorId: Scalars['Float'];
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
-  title: Scalars['String'];
-  creatorId: Scalars['Float'];
-  text: Scalars['String'];
-  points: Scalars['String'];
 };
 
 export type PostInput = {
@@ -96,16 +94,16 @@ export type Query = {
 
 
 export type QueryPostArgs = {
-  id: Scalars['Int'];
+  id: Scalars['Float'];
 };
 
 export type User = {
   __typename?: 'User';
-  _id: Scalars['Int'];
-  createdAt: Scalars['String'];
-  updatedAt: Scalars['String'];
+  id: Scalars['Float'];
   username: Scalars['String'];
   email: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
 };
 
 export type UserResponse = {
@@ -138,8 +136,7 @@ export type UserResponseTypeFragment = (
 
 export type UserTypeFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'username' | 'email'>
-  & { id: User['_id'] }
+  & Pick<User, 'id' | 'username' | 'email'>
 );
 
 export type ChangePasswordMutationVariables = Exact<{
@@ -165,7 +162,7 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & Pick<Post, '_id' | 'title' | 'text' | 'creatorId' | 'points'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId'>
   ) }
 );
 
@@ -202,9 +199,7 @@ export type LogoutMutation = (
 );
 
 export type RegisterMutationVariables = Exact<{
-  username: Scalars['String'];
-  password: Scalars['String'];
-  email: Scalars['String'];
+  options: UsernamePasswordInput;
 }>;
 
 
@@ -234,8 +229,7 @@ export type PostsQuery = (
   { __typename?: 'Query' }
   & { posts: Array<(
     { __typename?: 'Post' }
-    & Pick<Post, 'createdAt' | 'updatedAt' | 'title'>
-    & { id: Post['_id'] }
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title'>
   )> }
 );
 
@@ -247,7 +241,7 @@ export const ErrorsTypeFragmentDoc = gql`
     `;
 export const UserTypeFragmentDoc = gql`
     fragment UserType on User {
-  id: _id
+  id
   username
   email
 }
@@ -277,11 +271,13 @@ export function useChangePasswordMutation() {
 export const CreatePostDocument = gql`
     mutation CreatePost($input: PostInput!) {
   createPost(input: $input) {
-    _id
+    id
+    createdAt
+    updatedAt
     title
     text
-    creatorId
     points
+    creatorId
   }
 }
     `;
@@ -319,8 +315,8 @@ export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const RegisterDocument = gql`
-    mutation Register($username: String!, $password: String!, $email: String!) {
-  register(options: {username: $username, password: $password, email: $email}) {
+    mutation Register($options: UsernamePasswordInput!) {
+  register(options: $options) {
     ...UserResponseType
   }
 }
@@ -343,7 +339,7 @@ export function useCurrentUserQuery(options: Omit<Urql.UseQueryArgs<CurrentUserQ
 export const PostsDocument = gql`
     query Posts {
   posts {
-    id: _id
+    id
     createdAt
     updatedAt
     title

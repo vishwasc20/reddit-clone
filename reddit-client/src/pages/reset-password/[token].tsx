@@ -11,10 +11,10 @@ import { createUrqlClient } from "../../utils/create-urql-client";
 import { toErrorMap } from "../../utils/to-error-map";
 import NextLink from "next/link";
 
-const ResetPassword: NextPage<any> = () => {
+const ResetPassword: NextPage<any> = ({ token }) => {
+  const router = useRouter();
   const [, changePassword] = useChangePasswordMutation();
   const [tokenError, setTokenError] = useState("");
-  const router = useRouter();
 
   return (
     <Wrapper variant="small">
