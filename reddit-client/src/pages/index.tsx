@@ -21,12 +21,17 @@ const Index = () => {
     limit: 15,
     cursor: null as string | null,
   });
-  const [{ data, fetching }] = usePostsQuery({
+  const [{ data, fetching, error }] = usePostsQuery({
     variables,
   });
 
   if (!fetching && !data) {
-    return <div>Oops, something went wrong. No posts available to display</div>;
+    return (
+      <Box>
+        <div>Oops, something went wrong. No posts available to display</div>
+        <div>Error: {error?.message}</div>
+      </Box>
+    );
   }
 
   return (

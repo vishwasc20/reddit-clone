@@ -3,6 +3,8 @@ import { Session } from "express-session";
 import { Redis } from "ioredis";
 import { Field, ObjectType, InputType } from "type-graphql";
 import { User } from "./entities/User";
+import { createUpdootLoader } from "./utils/createUpdootLoader";
+import { createUserLoader } from "./utils/createUserLoader";
 
 @InputType()
 export class PostInput {
@@ -50,4 +52,6 @@ export type MyContext = {
   req: Request & { session: Session & SessionData };
   res: Response;
   redis: Redis;
+  userLoader: ReturnType<typeof createUserLoader>;
+  updootLoader: ReturnType<typeof createUpdootLoader>;
 };

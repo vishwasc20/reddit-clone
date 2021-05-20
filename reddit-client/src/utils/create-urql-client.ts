@@ -7,10 +7,18 @@ import {
   LogoutMutation,
   DeletePostMutationVariables,
 } from "../generated/graphql";
-import { cacheExchange } from "@urql/exchange-graphcache";
+import { Cache, cacheExchange } from "@urql/exchange-graphcache";
 import { updateQueryHelper } from "./update-query-helper";
 import { cursorPagination } from "./cursor-pagination-helper";
 import { isServer } from "./is-server";
+
+function invalidateAllPosts(cache: Cache) {
+  const allFields = cache.inspectFields("Query");
+  const fieldInfos = allFields.filter((info) => info.fieldName === "posts");
+  fieldInfos.forEach((fieldInfo) => {
+    cache.invalidate("Query", "posts", fieldInfo.arguments || {});
+  });
+}
 
 export const createUrqlClient = (ssrExchange: any, ctx: any) => ({
   url: "http://localhost:4000/graphql",
@@ -85,6 +93,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => ({
                 };
               }
             );
+            invalidateAllPosts(cache);
           },
           register: (_result, args, cache, info) => {
             updateQueryHelper<RegisterMutation, CurrentUserQuery>(
@@ -116,13 +125,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => ({
             );
           },
           createPost: (_result, args, cache, info) => {
-            const allFields = cache.inspectFields("Query");
-            const fieldInfos = allFields.filter(
-              (info) => info.fieldName === "posts"
-            );
-            fieldInfos.forEach((fieldInfo) => {
-              cache.invalidate("Query", "posts", fieldInfo.arguments || {});
-            });
+            invalidateAllPosts(cache);
           },
         },
       },
