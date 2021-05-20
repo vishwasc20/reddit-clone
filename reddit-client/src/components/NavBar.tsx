@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Link } from "@chakra-ui/react";
 import React from "react";
 import NextLink from "next/link";
 import { useCurrentUserQuery, useLogoutMutation } from "../generated/graphql";
@@ -14,7 +14,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
   let navLinks = null;
 
   if (fetchingLogin) {
-    navLinks = <Box>Loading</Box>;
+    navLinks = <Box>Loading...</Box>;
   } else if (!data?.currentUser) {
     navLinks = (
       <>
@@ -28,7 +28,12 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   } else {
     navLinks = (
-      <Flex>
+      <Flex align="center">
+        <NextLink href="/create-post">
+          <Button colorScheme="messenger" as={Link} mr={4}>
+            Create a new post
+          </Button>
+        </NextLink>
         <Box mr={2}>{data.currentUser.username}</Box>
         <Button
           variant="link"
@@ -42,8 +47,15 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
   }
 
   return (
-    <Flex bg="tan" p={4} ml="auto">
-      <Box ml="auto">{navLinks}</Box>
+    <Flex bg="tan" p={4} zIndex={1} position="sticky" top="0">
+      <Flex flex={1} m="auto" align="center" maxW={800}>
+        <NextLink href="/">
+          <Link>
+            <Heading>Reddit Clone</Heading>
+          </Link>
+        </NextLink>
+        <Box ml="auto">{navLinks}</Box>
+      </Flex>
     </Flex>
   );
 };

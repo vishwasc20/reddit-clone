@@ -13,10 +13,12 @@ import {
   Text,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
+import UpvoteSection from "../components/UpvoteSection";
+import PostActions from "../components/PostActions";
 
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 10,
+    limit: 15,
     cursor: null as string | null,
   });
   const [{ data, fetching }] = usePostsQuery({
@@ -29,24 +31,31 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex align="center">
-        <Heading>Reddit Clone</Heading>
-        <NextLink href="/create-post">
-          <Link ml="auto">Create a new post</Link>
-        </NextLink>
-      </Flex>
-
-      <br />
       {!data && fetching ? (
         <div>Loading posts...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.posts?.posts.map((post) => (
-            <Box key={post.id} p={5} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{post.title}</Heading>
-              <Text mt={4}>{post.textSnippet}</Text>
-            </Box>
-          ))}
+          {data!.posts?.posts.map((post) =>
+            !post ? null : (
+              <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
+                <UpvoteSection post={post} />
+                <Box flex={1}>
+                  <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{post.title}</Heading>
+                    </Link>
+                  </NextLink>
+                  <Text>Posted by {post.creator.username}</Text>
+                  <Flex align="center">
+                    <Text flex={1} mt={4}>
+                      {post.textSnippet}
+                    </Text>
+                    <PostActions id={post.id} creatorId={post.creator.id} />
+                  </Flex>
+                </Box>
+              </Flex>
+            )
+          )}
         </Stack>
       )}
       {data && data.posts?.hasMore ? (
