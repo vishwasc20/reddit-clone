@@ -12,7 +12,8 @@
     "start-ts": "ts-node src/index.ts",
     "docker-build": "docker build -t reddit-server .",
     "docker-run": "docker run -p 8080:8080 -it --name reddit-server-instance reddit-server",
-    "docker-pgAdmin": "docker run --rm -p 5050:5050 thajeztah/pgadmin4"
+    "docker-pgAdmin": "docker run --rm -p 5050:5050 thajeztah/pgadmin4",
+    "generate:env-types": "npx gen-env-types .env -o src/env.d.ts -e ."
   },
   "keywords": [],
   "author": "",
@@ -37,6 +38,7 @@
     "connect-redis": "^5.2.0",
     "cors": "^2.8.5",
     "dataloader": "^2.0.0",
+    "dotenv-safe": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "graphql": "^15.5.0",
