@@ -19,7 +19,10 @@ services:
     #   - .:/usr/src/app
     environment:
       DOCKER_DEV: true
+      REDIS_URL: redis-auth-service:6379
       DEBUG: false # redis logs
+      CORS_HOST: http://localhost:8080
+      SESSION_SECRET: qowiueojwojfalksdjoqiwueo
     depends_on:
       - postgres-db-service
       - redis-auth-service
