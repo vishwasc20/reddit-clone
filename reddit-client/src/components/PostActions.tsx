@@ -13,8 +13,8 @@ interface PostActionsProps {
 }
 
 const PostActions: React.FC<PostActionsProps> = ({ id, creatorId }) => {
-  const [{ data: currentUserData }] = useCurrentUserQuery();
-  const [, deletePost] = useDeletePostMutation();
+  const { data: currentUserData } = useCurrentUserQuery();
+  const [deletePost] = useDeletePostMutation();
   if (currentUserData?.currentUser?.id !== creatorId) {
     return null;
   }
@@ -36,7 +36,14 @@ const PostActions: React.FC<PostActionsProps> = ({ id, creatorId }) => {
         aria-label="delete post"
         icon={<DeleteIcon />}
         onClick={() => {
-          deletePost({ id });
+          deletePost({
+            variables: { id },
+            update: (cache) => {
+              cache.evict({
+                id: `Post:${id}`,
+              });
+            },
+          });
         }}
         size="sm"
       />

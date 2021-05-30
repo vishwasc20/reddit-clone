@@ -11,6 +11,7 @@ import {
   useUpdatePostMutation,
 } from "../../../generated/graphql";
 import { createUrqlClient } from "../../../utils/create-urql-client";
+import { withApollo } from "../../../utils/with-apollo";
 
 interface EditPostProps {}
 
@@ -18,13 +19,13 @@ const EditPost: React.FC<EditPostProps> = ({}) => {
   const router = useRouter();
   const intId =
     typeof router.query.id === "string" ? parseInt(router.query.id) : -1;
-  const [{ data: postData, fetching: fetchingPost }] = usePostQuery({
-    pause: intId === -1,
+  const { data: postData, loading: fetchingPost } = usePostQuery({
+    skip: intId === -1,
     variables: {
       id: intId,
     },
   });
-  const [, updatePost] = useUpdatePostMutation();
+  const [updatePost] = useUpdatePostMutation();
 
   if (fetchingPost) {
     return (
@@ -47,7 +48,7 @@ const EditPost: React.FC<EditPostProps> = ({}) => {
       <Formik
         initialValues={{ title: postData.post.title, text: postData.post.text }}
         onSubmit={async (values) => {
-          await updatePost({ id: intId, ...values });
+          await updatePost({ variables: { id: intId, ...values } });
           router.back();
         }}
       >
@@ -77,4 +78,4 @@ const EditPost: React.FC<EditPostProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(EditPost);
+export default withApollo({ ssr: false })(EditPost);
