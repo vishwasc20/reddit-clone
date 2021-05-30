@@ -5,8 +5,9 @@ services:
       context: reddit-client
     ports:
       - "8080:3000"
-    # volumes:
-    #   - .:/usr/src/app
+    volumes:
+      - ./reddit-client:/usr/src/app
+      - /usr/src/app/node_modules # ignores node_modules in container
     depends_on:
       - reddit-server
   reddit-server:
@@ -15,14 +16,17 @@ services:
     # command: "yarn watch"
     ports:
       - "4000:4000"
-    # volumes:
-    #   - .:/usr/src/app
+    volumes:
+      - ./reddit-server:/usr/src/app
+      - /usr/src/app/node_modules # ignores node_modules in container
     environment:
       DOCKER_DEV: "true"
       REDIS_URL: redis-auth-service:6379
-      DEBUG: false # redis logs
+      DEBUG: "false" # redis logs
       CORS_HOST: http://localhost:8080
       SESSION_SECRET: qowiueojwojfalksdjoqiwueo
+      DATABASE_URL: "postgresql://postgres:postgres@postgres-db-service:5432/reddittypeorm"
+      PORT: "4000"
     depends_on:
       - postgres-db-service
       - redis-auth-service

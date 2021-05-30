@@ -38,8 +38,9 @@ const main = async () => {
   });
   await typeORMConnection.runMigrations();
 
-  // To delete all posts clean
+  // To delete all posts & users clean
   // await Post.delete({});
+  // await User.delete({});
 
   const app = express();
 

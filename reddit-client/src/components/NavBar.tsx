@@ -4,6 +4,7 @@ import NextLink from "next/link";
 import { useCurrentUserQuery, useLogoutMutation } from "../generated/graphql";
 import { isServer } from "../utils/is-server";
 import { useApolloClient } from "@apollo/client";
+import { capitalizeFirstLetter } from "../utils/string-helpers";
 
 interface NavBarProps {}
 
@@ -36,7 +37,7 @@ const NavBar: React.FC<NavBarProps> = ({}) => {
             Create a new post
           </Button>
         </NextLink>
-        <Box mr={2}>{data.currentUser.username}</Box>
+        <Box mr={2}>{capitalizeFirstLetter(data.currentUser.username)}</Box>
         <Button
           variant="link"
           onClick={async () => {
